@@ -1,0 +1,34 @@
+<script type="text/javascript">
+    RED.nodes.registerType('picnic-instance', {
+        category: 'config',
+        defaults: {
+            countrycode: { value: '' },
+            email: { value: '', required: true },
+            password: { value: '', required: true }
+        },
+        /*
+        credentials: {
+            password: {type:"password"}
+        },
+        */
+        label: function () {
+            return this.name || this.email;
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="picnic-instance">
+    <div class="form-row">
+        <label for="node-config-input-countrycode"><i class="fa fa-pencil"></i> Country Code</label>
+        <input type="text" id="node-config-input-countrycode">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-email"><i class="fa fa-cog"></i> E-mail</label>
+        <input id="node-config-input-email">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-tag"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+</script>

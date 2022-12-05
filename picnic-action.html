@@ -1,0 +1,59 @@
+<script type="text/javascript">
+    RED.nodes.registerType('picnic-action', {
+        category: 'Picnic',
+        color: '#FFFFE7',
+        defaults: {
+            name: { value: "" },
+            picnicinstance: { value: "", type: "picnic-instance", required: true }
+        },
+        action: { value: '' },
+        position: {
+            value: '',
+            validate: function (v) {
+                return this.action !== 'position' || !isNaN(v);
+            }
+        },
+        optime: {
+            value: '',
+            validate: function (v) {
+                return v.length === 0 || !isNaN(v);
+            }
+        },
+        emitStop: { value: false },
+        inputs: 1,
+        outputs: 1,
+        outputLabels: ["response msg"],
+        //icon: "fhemicon.png",
+        label: function () {
+            if (this.name) {
+                return this.name;
+            } else {
+                return "picnic-action";
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="picnic-action">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-picnicinstance"><i class="fa fa-cog"></i> Instance</label>
+        <input id="node-input-picnicinstance">
+    </div>
+    <div class="form-tips"><b>Tip:</b> you can use devicename and reading at the same time to filter the incoming messages.</div>
+</script>
+
+<script type="text/html" data-help-name="picnic-action">
+    <p>A node that parse and filters messages from a fhem-instance</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+    <dt>payload
+        <span class="property-type">raw fhem message</span>
+    </dt>
+    <dt>timestamp
+        <span class="property-type">time of message income</span>
+    </dt>
+</script>
