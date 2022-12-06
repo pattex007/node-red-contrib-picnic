@@ -28,13 +28,23 @@ module.exports = function (RED) {
             msg.request = msg.topic;
 
             //picnic.eventEmitter.emit("request_send", {"source": node.id, "request": msg.topic, "payload": msg.payload});
+            this.status({ fill: "green", shape: "dot", text: "Processing..." });
             picnic.eventEmitter.emit("request_send", msg);
         });
         picnic.eventEmitter.on("response", (response) => {
             //console.log(response);
             if ( response.source==node.id ) {
+                this.status({ fill: "green", shape: "dot", text: "OK" });
                 delete response.source;
                 this.send([response]);
+            }
+        });
+        picnic.eventEmitter.on("error", (response) => {
+            //console.log(response);
+            if ( response.source==node.id ) {
+                this.status({ fill: "red", shape: "dot", text: response.message });
+                delete response.source;
+                this.send([null,response]);
             }
         });
         picnic.eventEmitter.on("cmd_connected", () => {
