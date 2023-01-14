@@ -9,8 +9,13 @@ const PicnicClient = require("picnic-api");
 module.exports = function (RED) {
 
     function PicNicInstance(config) {
+        var apiVersion = 17;
+        if ( config.countrycode.toLowerCase()=="de" ) {
+            apiVersion = 15;
+        }
         const picnicClient = new PicnicClient({
-            countryCode: config.countrycode
+            countryCode: config.countrycode,
+            apiVersion: apiVersion
         });
         RED.nodes.createNode(this, config);
 
@@ -26,7 +31,8 @@ module.exports = function (RED) {
 
         picnicClient.login(config.email, config.password).then(_ => {
             // send an authenticated request...
-            //console.log(picnicClient);
+            //console.log(picnicClient.apiVersion);
+            //console.log(picnicClient.authkey);
             t.eventEmitter.emit("connected");
             /*
             picnicClient.getUserDetails().then(userInfo => {
@@ -36,7 +42,11 @@ module.exports = function (RED) {
         });
         this.eventEmitter.on("request_send", (data) => {
             //console.log(data);
-
+                //API 17 required
+                const picnicClient17 = new PicnicClient({
+                    countryCode: config.countrycode,
+                    apiVersion: 17
+                });
                 switch(data.request) {
                     case "getUserDetails":
                         picnicClient.getUserDetails().then(userInfo => {
@@ -57,22 +67,31 @@ module.exports = function (RED) {
                         });
                         break;
                     case "getDeliveries":
-                        picnicClient.getDeliveries(data.payload).then(userInfo => {
-                            if ( data.payload == null )  data.payload = [];
-                            data.payload = userInfo;
-                            t.eventEmitter.emit("response",data);
-                        }).catch((error) => {
-                            error.source = data.source;
-                            t.eventEmitter.emit("error",error);
+                        picnicClient17.login(config.email, config.password).then(_ => {
+                            // send an authenticated request...
+                            if ( data.payload == null || data.payload == "" )  data.payload = [];
+                            picnicClient17.getDeliveries(data.payload).then(deliveries => {
+                                data.payload = deliveries;
+                                t.eventEmitter.emit("response",data);
+                            }).catch((error) => {
+                                error.source = data.source;
+                                t.eventEmitter.emit("error",error);
+                            });
+                            
                         });
                         break;
                     case "getDelivery":
-                        picnicClient.getDelivery(data.payload).then(userInfo => {
-                            data.payload = userInfo;
-                            t.eventEmitter.emit("response",data);
-                        }).catch((error) => {
-                            error.source = data.source;
-                            t.eventEmitter.emit("error",error);
+                        picnicClient17.login(config.email, config.password).then(_ => {
+                            // send an authenticated request...
+                            if ( data.payload == null || data.payload == "" )  data.payload = [];
+                            picnicClient17.getDelivery(data.payload).then(userInfo => {
+                                data.payload = userInfo;
+                                t.eventEmitter.emit("response",data);
+                            }).catch((error) => {
+                                error.source = data.source;
+                                t.eventEmitter.emit("error",error);
+                            });
+                            
                         });
                         break;
                     case "search":
@@ -95,10 +114,10 @@ module.exports = function (RED) {
                         break;
                     case "getDeliveryPosition":
                         picnicClient.getDeliveryPosition(data.payload).then(userInfo => {
-                            console.log(userinfo);
                             data.payload = userInfo;
                             t.eventEmitter.emit("response",data);
                         }).catch((error) => {
+                            console.log(error.message);
                             error.source = data.source;
                             t.eventEmitter.emit("error",error);
                         });
